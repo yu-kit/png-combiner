@@ -8,6 +8,8 @@
 <body>
   <h1>PNG Combiner</h1>
   <input type="file" id="fileInput" multiple accept="image/png">
+  <label for="columnsInput">Columns:</label>
+  <input type="number" id="columnsInput" min="1" value="2">
   <button id="combineButton">Combine Images</button>
   <canvas id="canvas" style="display:none;"></canvas>
   <a id="downloadLink" style="display:none;">Download Combined Image</a>

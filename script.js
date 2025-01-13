@@ -1,11 +1,18 @@
 document.getElementById('combineButton').addEventListener('click', async () => {
     const fileInput = document.getElementById('fileInput');
     const files = fileInput.files;
+    const columns = parseInt(document.getElementById('columnsInput').value, 10);
+
     if (!files.length) {
       alert("Please select PNG files.");
       return;
     }
-  
+    if (isNaN(columns) || columns < 1) {
+      alert("Please enter a valid number of columns.");
+      return;
+    }
+    
+    // Load images
     const images = await Promise.all(
       Array.from(files).map(file => {
         return new Promise((resolve, reject) => {
@@ -20,18 +27,26 @@ document.getElementById('combineButton').addEventListener('click', async () => {
     const canvas = document.getElementById('canvas');
     const context = canvas.getContext('2d');
   
-    // 計算: 結合後のキャンバスのサイズを決定（縦に連結する場合）
-    const totalWidth = Math.max(...images.map(img => img.width));
-    const totalHeight = images.reduce((sum, img) => sum + img.height, 0);
+    // カラムをもとにキャンパスサイズを計算
+    const totalWidth = Math.max(...images.map(img => img.width)) * columns;
+    const rows = Math.ceil(images.length / columns);
+    const totalHeight = Math.max(...images.map(img => img.height)) * rows;
     canvas.width = totalWidth;
     canvas.height = totalHeight;
   
     // 画像をキャンバスに描画
+    let xOffset = 0;
     let yOffset = 0;
-    for (const img of images) {
-      context.drawImage(img, 0, yOffset);
-      yOffset += img.height;
-    }
+    images.forEach((img, index) => {
+      context.drawImage(img, xOffset, yOffset);
+      xOffset += img.width;
+      
+      // Move to next row if end of column is reached
+      if ((index + 1) % columns === 0) {
+        xOffset = 0;
+        yOffset += img.height;
+      }
+    });
   
     // PNGとしてエクスポート
     const combinedImage = canvas.toDataURL("image/png");
